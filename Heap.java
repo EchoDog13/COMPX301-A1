@@ -3,51 +3,62 @@ package Assignment_1;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class Heap {
 
     private static final int runLength = 64 + 1;
-    private static final String inputFile = "input_story.txt";
+    private static final String inputFile = "MobyDick.txt";
     private static final String outputFile = "output_story.txt";
-    private String[] heap = new String[runLength];
+    private static String[] heap = new String[runLength];
 
     public static void main(String[] args) {
-        Heap heapObj = new Heap();
-        heapObj.readDataStream();
+        // Heap heapObj = new Heap();
+        readDataStream();
         // heapObj.printArray();
-        heapObj.popAndPrint();
     }
 
-    private void readDataStream() {
+    private static void readDataStream() {
         try (Scanner scanner = new Scanner(new FileInputStream(inputFile))) {
-            int i = 1;
-            while (scanner.hasNextLine() && i < runLength) {
-                String line = scanner.nextLine().trim();
-                // Skip empty lines
-                while (line.isEmpty() && scanner.hasNextLine()) {
-                    line = scanner.nextLine().trim();
+
+            while (scanner.hasNextLine()) {
+                Arrays.fill(heap, null);
+                int i = 1;
+
+                while (scanner.hasNextLine() && i < runLength) {
+                    String line = scanner.nextLine().trim();
+                    while (line.isEmpty() && scanner.hasNextLine()) {
+                        line = scanner.nextLine().trim();
+                    }
+                    if (!line.isEmpty()) {
+                        heap[i] = line;
+                        i++;
+                    }
                 }
-                if (!line.isEmpty()) {
-                    heap[i] = line;
-                    i++;
-                }
+
+                // Pass the actual count of elements (i - 1) instead of heap.length
+                buildMinHeap(i - 1);
+                popAndPrint(i - 1);
+
             }
-            buildMinHeap();
+            scanner.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void buildMinHeap() {
-        int n = heap.length - 1; // Ignore index 0
-        for (int i = n / 2; i >= 1; i--) {
-            heapify(i, n);
+    private static void buildMinHeap(int size) {
+        if (size < 2)
+            return; // No need to heapify if there's only one element
+
+        for (int i = size / 2; i >= 1; i--) {
+            heapify(i, size);
         }
     }
 
     // i = current position to run heapify
-    private void heapify(int i, int n) {
+    private static void heapify(int i, int n) {
         int smallest = i;
         int left = 2 * i;
         int right = (2 * i) + 1;
@@ -66,7 +77,7 @@ public class Heap {
         }
     }
 
-    private void swap(int i, int smallest) {
+    private static void swap(int i, int smallest) {
         String temp = heap[i];
         heap[i] = heap[smallest];
         heap[smallest] = temp;
@@ -80,26 +91,23 @@ public class Heap {
         }
     }
 
-    private void popAndPrint() {
+    private static void popAndPrint(int size) {
+        System.out.println("\n\n\nORDERED\n\n\n");
 
-        System.out.println("\n\n\n" + "ORDERED" + "\n\n\n");
-
-        int n = heap.length - 1; // size of heap (ignoring index 0)
+        if (size < 1)
+            return;
 
         try (FileWriter writer = new FileWriter(outputFile)) {
-            while (n > 0) {
-                // Print the root (smallest element)
+            while (size > 0 && heap[1] != null) {
                 System.out.println(heap[1]);
                 writer.write(heap[1] + "\n");
 
-                // Swap the root with the last element
-                swap(1, n);
+                swap(1, size);
+                size--;
 
-                // Decrease the heap size
-                n--;
-
-                // Heapify the root to restore the min-heap property
-                heapify(1, n);
+                if (size > 0) {
+                    heapify(1, size);
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
