@@ -10,7 +10,9 @@ public class Heap {
 
     private static final int runLength = 64 + 1;
     private static final String inputFile = "MobyDick.txt";
-    private static final String outputFile = "output_story.txt";
+    private static final String tempFile_1 = "tempFile_1.txt";
+    private static final String tempFile_2 = "tempFile_2.txt";
+
     private static String[] heap = new String[runLength];
 
     public static void main(String[] args) {
@@ -20,11 +22,13 @@ public class Heap {
     }
 
     private static void readDataStream() {
+        int runCount = 0;
         try (Scanner scanner = new Scanner(new FileInputStream(inputFile))) {
 
             while (scanner.hasNextLine()) {
                 Arrays.fill(heap, null);
                 int i = 1;
+                runCount++;
 
                 while (scanner.hasNextLine() && i < runLength) {
                     String line = scanner.nextLine().trim();
@@ -37,9 +41,9 @@ public class Heap {
                     }
                 }
 
-                // Pass the actual count of elements (i - 1) instead of heap.length
+                // Pass the actual count of elements (i - 1)
                 buildMinHeap(i - 1);
-                popAndPrint(i - 1);
+                popAndPrint(i - 1, runCount);
 
             }
             scanner.close();
@@ -91,16 +95,24 @@ public class Heap {
         }
     }
 
-    private static void popAndPrint(int size) {
+    private static void popAndPrint(int size, int runCount) {
         System.out.println("\n\n\nORDERED\n\n\n");
 
         if (size < 1)
             return;
 
-        try (FileWriter writer = new FileWriter(outputFile)) {
+        try (FileWriter writer1 = new FileWriter(tempFile_1, true);
+                FileWriter writer2 = new FileWriter(tempFile_2, true);) {
             while (size > 0 && heap[1] != null) {
                 System.out.println(heap[1]);
-                writer.write(heap[1] + "\n");
+
+                if (runCount % 2 == 0) {
+                    writer1.write(heap[1] + "\n");
+                    writer1.flush();
+                } else {
+                    writer2.write(heap[1] + "\n");
+                    writer2.flush();
+                }
 
                 swap(1, size);
                 size--;
