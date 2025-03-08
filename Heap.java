@@ -9,7 +9,7 @@ import java.util.Scanner;
 public class Heap {
 
     private static final int runLength = 64 + 1;
-    private static final String inputFile = "MobyDick.txt";
+    private static final String inputFile = "BrownCorpus.txt";
     private static final String tempFile_1 = "tempFile_1.txt";
     private static final String tempFile_2 = "tempFile_2.txt";
 
@@ -23,6 +23,13 @@ public class Heap {
 
     private static void readDataStream() {
         int runCount = 0;
+
+        try (FileWriter writer1 = new FileWriter(tempFile_1, false); // Overwrite mode clears the file
+                FileWriter writer2 = new FileWriter(tempFile_2, false)) { // Overwrite mode clears the file
+            // The files are now cleared because we opened them in overwrite mode.
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         try (Scanner scanner = new Scanner(new FileInputStream(inputFile))) {
 
             while (scanner.hasNextLine()) {
@@ -43,9 +50,11 @@ public class Heap {
 
                 // Pass the actual count of elements (i - 1)
                 buildMinHeap(i - 1);
+
                 popAndPrint(i - 1, runCount);
 
             }
+
             scanner.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -107,10 +116,10 @@ public class Heap {
                 System.out.println(heap[1]);
 
                 if (runCount % 2 == 0) {
-                    writer1.write(heap[1] + "\n");
+                    writer1.append(heap[1] + "\n");
                     writer1.flush();
                 } else {
-                    writer2.write(heap[1] + "\n");
+                    writer2.append(heap[1] + "\n");
                     writer2.flush();
                 }
 
