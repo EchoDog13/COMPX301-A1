@@ -8,7 +8,7 @@ import java.util.Scanner;
 
 public class Heap {
 
-    private static final int runLength = 64 + 1;
+    private static final int runLength = 10000 + 1; // Heap size (1-based indexing)
     private static final String inputFile = "BrownCorpus.txt";
     private static final String tempFile_1 = "tempFile_1.txt";
     private static final String tempFile_2 = "tempFile_2.txt";
@@ -16,27 +16,27 @@ public class Heap {
     private static String[] heap = new String[runLength];
 
     public static void main(String[] args) {
-        // Heap heapObj = new Heap();
         readDataStream();
-        // heapObj.printArray();
     }
 
-    private static void readDataStream() {
+    public static void readDataStream() {
         int runCount = 0;
 
-        try (FileWriter writer1 = new FileWriter(tempFile_1, false); // Overwrite mode clears the file
-                FileWriter writer2 = new FileWriter(tempFile_2, false)) { // Overwrite mode clears the file
-            // The files are now cleared because we opened them in overwrite mode.
+        // Clear the output files
+        try (FileWriter writer1 = new FileWriter(tempFile_1, false);
+                FileWriter writer2 = new FileWriter(tempFile_2, false)) {
+            // Files are cleared by opening in overwrite mode
         } catch (IOException e) {
             e.printStackTrace();
         }
-        try (Scanner scanner = new Scanner(new FileInputStream(inputFile))) {
 
+        try (Scanner scanner = new Scanner(new FileInputStream(inputFile))) {
             while (scanner.hasNextLine()) {
-                Arrays.fill(heap, null);
+                Arrays.fill(heap, null); // Clear the heap for each run
                 int i = 1;
                 runCount++;
 
+                // Read elements into the heap
                 while (scanner.hasNextLine() && i < runLength) {
                     String line = scanner.nextLine().trim();
                     while (line.isEmpty() && scanner.hasNextLine()) {
@@ -48,11 +48,11 @@ public class Heap {
                     }
                 }
 
-                // Pass the actual count of elements (i - 1)
+                // Build the min-heap with the actual number of elements (i - 1)
                 buildMinHeap(i - 1);
 
+                // Pop elements from the heap and write to the appropriate file
                 popAndPrint(i - 1, runCount);
-
             }
 
             scanner.close();
@@ -70,12 +70,13 @@ public class Heap {
         }
     }
 
-    // i = current position to run heapify
+    // Heapify the subtree rooted at index i
     private static void heapify(int i, int n) {
         int smallest = i;
         int left = 2 * i;
         int right = (2 * i) + 1;
 
+        // Compare elements as strings for lexicographical sorting
         if (left <= n && heap[left].compareTo(heap[smallest]) < 0) {
             smallest = left;
         }
@@ -86,22 +87,14 @@ public class Heap {
 
         if (smallest != i) {
             swap(i, smallest);
-            heapify(smallest, n);
+            heapify(smallest, n); // Recursively heapify the affected subtree
         }
     }
 
-    private static void swap(int i, int smallest) {
+    private static void swap(int i, int j) {
         String temp = heap[i];
-        heap[i] = heap[smallest];
-        heap[smallest] = temp;
-    }
-
-    private void printArray() {
-        for (int i = 1; i < heap.length; i++) {
-            if (heap[i] != null) {
-                System.out.println(heap[i]);
-            }
-        }
+        heap[i] = heap[j];
+        heap[j] = temp;
     }
 
     private static void popAndPrint(int size, int runCount) {
@@ -111,10 +104,11 @@ public class Heap {
             return;
 
         try (FileWriter writer1 = new FileWriter(tempFile_1, true);
-                FileWriter writer2 = new FileWriter(tempFile_2, true);) {
+                FileWriter writer2 = new FileWriter(tempFile_2, true)) {
             while (size > 0 && heap[1] != null) {
-                System.out.println(heap[1]);
+                System.out.println(heap[1]); // Print the smallest element
 
+                // Write to the appropriate file based on runCount
                 if (runCount % 2 == 0) {
                     writer1.append(heap[1] + "\n");
                     writer1.flush();
@@ -123,9 +117,11 @@ public class Heap {
                     writer2.flush();
                 }
 
+                // Swap the root with the last element and reduce the heap size
                 swap(1, size);
                 size--;
 
+                // Heapify the root to maintain the heap property
                 if (size > 0) {
                     heapify(1, size);
                 }

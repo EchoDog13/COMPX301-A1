@@ -1,0 +1,72 @@
+Merge(RunCount, C)
+
+runCount = 0  // Tracks number of merged runs
+cycleCount = 0  // Determines input/output switch
+
+Initialise Reader1
+Initialise Reader2
+
+Initialise Writer1
+Initialise Writer2
+
+IF (cycleCount mod 2 == 0) {
+    SET Reader1 INPUT = t1
+    SET Reader2 INPUT = t2
+
+    SET Writer1 OUTPUT = t3
+    SET Writer2 OUTPUT = t4
+}
+ELSE {
+    SET Reader1 INPUT = t3
+    SET Reader2 INPUT = t4
+
+    SET Writer1 OUTPUT = t1
+    SET Writer2 OUTPUT = t2
+}
+
+String R1Previous = null;
+String R2Previous = null;
+
+String R1Current = Reader1.Readline();
+String R2Current = Reader2.Readline();
+
+currentWriter = Writer1;  // Start with Writer1
+
+WHILE (R1Current != EOF || R2Current != EOF) {  // Continue until both are exhausted
+
+    // Merge runs while order is preserved
+    WHILE (R1Current is after R1Previous && R2Current is after R2Previous) {
+        IF (R1Current comes before R2Current) {
+            output(R1Current) to currentWriter;
+            R1Previous = R1Current;
+            R1Current = Reader1.Readline();
+        } ELSE {  // R2 comes first
+            output(R2Current) to currentWriter;
+            R2Previous = R2Current;
+            R2Current = Reader2.Readline();
+        }
+    }
+
+    // Handle when R1's run ends before R2's
+    WHILE (R2Current is after R2Previous && R1Current is before R1Previous) {
+        output(R2Current) to currentWriter;
+        R2Previous = R2Current;
+        R2Current = Reader2.Readline();
+    }
+
+    // Handle when R2's run ends before R1's
+    WHILE (R1Current is after R1Previous && R2Current is before R2Previous) {
+        output(R1Current) to currentWriter;
+        R1Previous = R1Current;
+        R1Current = Reader1.Readline();
+    }
+
+    // **Switch writer for next run**
+    IF (currentWriter == Writer1) {
+        currentWriter = Writer2;
+    } ELSE {
+        currentWriter = Writer1;
+    }
+
+    runCount++;  // Successfully merged one run
+}
