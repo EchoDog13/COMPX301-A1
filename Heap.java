@@ -39,6 +39,7 @@ public class Heap {
                 // Read elements into the heap
                 while (scanner.hasNextLine() && i < runLength) {
                     String line = scanner.nextLine().trim();
+                    System.out.println(line);
                     while (line.isEmpty() && scanner.hasNextLine()) {
                         line = scanner.nextLine().trim();
                     }
@@ -56,7 +57,8 @@ public class Heap {
             }
 
             scanner.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
+            // TODO: handle exception
             e.printStackTrace();
         }
     }
