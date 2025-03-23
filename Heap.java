@@ -1,26 +1,26 @@
-package Assignment_1;
 
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Scanner;
 
 public class Heap {
+    private static int runLength = 10 + 1; // Default heap size (1-based indexing)
 
-    private static final int runLength = 10000 + 1; // Heap size (1-based indexing)
-    private static final String inputFile = "BrownCorpus.txt";
+    public static void setRunLength(int length) {
+        runLength = length + 1;
+        heap = new String[runLength];
+    }
+
     private static final String tempFile_1 = "tempFile_1.txt";
     private static final String tempFile_2 = "tempFile_2.txt";
 
-    private static String[] heap = new String[runLength];
+    static String[] heap = new String[runLength + 1];
 
-    public static void main(String[] args) {
-        readDataStream();
-    }
-
-    public static void readDataStream() {
+    public static void main(int runLength) {
         int runCount = 0;
+        setRunLength(runLength);
 
         // Clear the output files
         try (FileWriter writer1 = new FileWriter(tempFile_1, false);
@@ -30,16 +30,14 @@ public class Heap {
             e.printStackTrace();
         }
 
-        try (Scanner scanner = new Scanner(new FileInputStream(inputFile))) {
+        try (Scanner scanner = new Scanner(System.in)) {
             while (scanner.hasNextLine()) {
                 Arrays.fill(heap, null); // Clear the heap for each run
                 int i = 1;
-                runCount++;
 
                 // Read elements into the heap
-                while (scanner.hasNextLine() && i < runLength) {
+                while (scanner.hasNextLine() && i < runLength + 1) {
                     String line = scanner.nextLine().trim();
-                    System.out.println(line);
                     while (line.isEmpty() && scanner.hasNextLine()) {
                         line = scanner.nextLine().trim();
                     }
@@ -54,11 +52,11 @@ public class Heap {
 
                 // Pop elements from the heap and write to the appropriate file
                 popAndPrint(i - 1, runCount);
+                            runCount++;
+
             }
 
-            scanner.close();
         } catch (Exception e) {
-            // TODO: handle exception
             e.printStackTrace();
         }
     }
@@ -79,11 +77,11 @@ public class Heap {
         int right = (2 * i) + 1;
 
         // Compare elements as strings for lexicographical sorting
-        if (left <= n && heap[left].compareTo(heap[smallest]) < 0) {
+        if (left <= n && heap[left].compareToIgnoreCase(heap[smallest]) < 0) {
             smallest = left;
         }
 
-        if (right <= n && heap[right].compareTo(heap[smallest]) < 0) {
+        if (right <= n && heap[right].compareToIgnoreCase(heap[smallest]) < 0) {
             smallest = right;
         }
 
@@ -100,24 +98,17 @@ public class Heap {
     }
 
     private static void popAndPrint(int size, int runCount) {
-        System.out.println("\n\n\nORDERED\n\n\n");
-
         if (size < 1)
             return;
 
-        try (FileWriter writer1 = new FileWriter(tempFile_1, true);
-                FileWriter writer2 = new FileWriter(tempFile_2, true)) {
-            while (size > 0 && heap[1] != null) {
-                System.out.println(heap[1]); // Print the smallest element
+        try (FileWriter writer = new FileWriter(runCount % 2 == 0 ? tempFile_1 : tempFile_2, true)) {
 
-                // Write to the appropriate file based on runCount
-                if (runCount % 2 == 0) {
-                    writer1.append(heap[1] + "\n");
-                    writer1.flush();
-                } else {
-                    writer2.append(heap[1] + "\n");
-                    writer2.flush();
-                }
+            while (size > 0 && heap[1] != null) {
+
+                // Write the smallest element to the appropriate file
+
+                writer.write(heap[1] + "\n");
+                // System.out.println(heap[1]); // Print the smallest element
 
                 // Swap the root with the last element and reduce the heap size
                 swap(1, size);
@@ -128,6 +119,7 @@ public class Heap {
                     heapify(1, size);
                 }
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         }

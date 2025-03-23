@@ -1,5 +1,3 @@
-package Assignment_1;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -10,13 +8,28 @@ public class Merge {
     public static void main(String[] args) {
         // Call the static merge method in a loop until only one run is left
         int cycleCount = 0;
-        while (new File("tempFile_1.txt").length() > 0 && new File("tempFile_2.txt").length() > 0) {
+        boolean progressMade = true;
+
+        while (progressMade) {
+            File file1 = new File("tempFile_1.txt");
+            File file2 = new File("tempFile_2.txt");
+            File file3 = new File("tempFile_3.txt");
+            File file4 = new File("tempFile_4.txt");
+
+            // Check if both input files are empty and stop if they are
+            if ((cycleCount % 2 == 0 && file1.length() == 0 && file2.length() == 0) ||
+                    (cycleCount % 2 != 0 && file3.length() == 0 && file4.length() == 0)) {
+                progressMade = false;
+                break;
+            }
+
             cycleCount = merge(cycleCount);
         }
     }
 
     public static int merge(int cycleCount) {
-        int runCount = 0; // Tracks the number of merged runs
+        int runCount = 0;
+        boolean merged = false;
 
         Scanner reader1 = null;
         Scanner reader2 = null;
@@ -24,61 +37,45 @@ public class Merge {
         PrintWriter writer2 = null;
 
         try {
-            // Initialize the readers and writers based on cycleCount
-            if (cycleCount % 2 == 0) {
-                reader1 = new Scanner(new File("tempFile_1.txt"));
-                reader2 = new Scanner(new File("tempFile_2.txt"));
-                writer1 = new PrintWriter("tempFile_3.txt");
-                writer2 = new PrintWriter("tempFile_4.txt");
-            } else {
-                reader1 = new Scanner(new File("tempFile_3.txt"));
-                reader2 = new Scanner(new File("tempFile_4.txt"));
-                writer1 = new PrintWriter("tempFile_1.txt");
-                writer2 = new PrintWriter("tempFile_2.txt");
-            }
+            String inputFile1 = (cycleCount % 2 == 0) ? "tempFile_1.txt" : "tempFile_3.txt";
+            String inputFile2 = (cycleCount % 2 == 0) ? "tempFile_2.txt" : "tempFile_4.txt";
+            String outputFile1 = (cycleCount % 2 == 0) ? "tempFile_3.txt" : "tempFile_1.txt";
+            String outputFile2 = (cycleCount % 2 == 0) ? "tempFile_4.txt" : "tempFile_2.txt";
 
-            String prevR1 = null;
-            String prevR2 = null;
+            reader1 = new Scanner(new File(inputFile1));
+            reader2 = new Scanner(new File(inputFile2));
+            writer1 = new PrintWriter(outputFile1);
+            writer2 = new PrintWriter(outputFile2);
 
             String currR1 = reader1.hasNextLine() ? reader1.nextLine() : null;
             String currR2 = reader2.hasNextLine() ? reader2.nextLine() : null;
 
-            // Start with Writer1
             PrintWriter currentWriter = writer1;
+            boolean switchWriter = false;
 
-            // Continue merging until both files are exhausted
             while (currR1 != null || currR2 != null) {
-                // Merge based on the lexicographical order
-                if (currR1 != null && (currR2 == null || currR1.compareTo(currR2) < 0)) {
-                    currentWriter.println(currR1); // Write to current writer
-                    prevR1 = currR1;
-                    System.out.println(currR1);
-                    currR1 = reader1.hasNextLine() ? reader1.nextLine() : null; // Read next line from file 1
-                } else if (currR2 != null) {
-                    currentWriter.println(currR2); // Write to current writer
-                    prevR2 = currR2;
-                    System.err.println(currR2);
-                    currR2 = reader2.hasNextLine() ? reader2.nextLine() : null; // Read next line from file 2
+                if (currR1 != null && (currR2 == null || currR1.compareToIgnoreCase(currR2) < 0)) {
+                    currentWriter.println(currR1);
+                    currR1 = reader1.hasNextLine() ? reader1.nextLine() : null;
+                } else {
+                    currentWriter.println(currR2);
+                    currR2 = reader2.hasNextLine() ? reader2.nextLine() : null;
                 }
 
-                // Check if the order condition breaks
-                if ((currR1 != null && prevR1 != null && prevR1.compareTo(currR1) > 0) ||
-                        (currR2 != null && prevR2 != null && prevR2.compareTo(currR2) > 0)) {
-                    // Order condition breaks, switch to a new run
-                    runCount++;
-                    if (currentWriter == writer1) {
-                        currentWriter = writer2;
-                    } else {
-                        currentWriter = writer1;
-                    }
+                if (switchWriter) {
+                    currentWriter = (currentWriter == writer1) ? writer2 : writer1;
+                    switchWriter = false;
+                    merged = true;
+                }
+
+                if (currR1 != null && currR2 != null && currR1.compareToIgnoreCase(currR2) > 0) {
+                    switchWriter = true;
                 }
             }
-
         } catch (FileNotFoundException e) {
             System.out.println("Error: File not found.");
             e.printStackTrace();
         } finally {
-            // Close the readers and writers
             if (reader1 != null)
                 reader1.close();
             if (reader2 != null)
@@ -88,6 +85,6 @@ public class Merge {
             if (writer2 != null)
                 writer2.close();
         }
-        return cycleCount + 1;
+        return merged ? cycleCount + 1 : cycleCount;
     }
 }
