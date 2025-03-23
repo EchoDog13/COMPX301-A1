@@ -8,7 +8,7 @@ public class XSort {
 
         int runLength = Integer.parseInt(args[0]);
         Heap.main(runLength);
-        Merge.main(args);
+        Merge2.main(args);
     }
 
 }

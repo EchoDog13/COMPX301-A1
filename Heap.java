@@ -52,7 +52,7 @@ public class Heap {
 
                 // Pop elements from the heap and write to the appropriate file
                 popAndPrint(i - 1, runCount);
-                            runCount++;
+                runCount++;
 
             }
 
