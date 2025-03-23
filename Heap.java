@@ -6,13 +6,20 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 public class Heap {
-    private static int runLength = 10 + 1; // Default heap size (1-based indexing)
+    private static int runLength = 64 + 1; // Default heap size (1-based indexing)
 
+    /**
+     * Set the run length for the heap
+     * 
+     * @param length the run length
+     */
     public static void setRunLength(int length) {
+        // Set the run length for the heap adding 1 for 1-based indexing of the heap
         runLength = length + 1;
         heap = new String[runLength];
     }
 
+    // Temporary files for heap sort output
     private static final String tempFile_1 = "tempFile_1.txt";
     private static final String tempFile_2 = "tempFile_2.txt";
 
@@ -30,6 +37,7 @@ public class Heap {
             e.printStackTrace();
         }
 
+        // Read input from the console/standard input
         try (Scanner scanner = new Scanner(System.in)) {
             while (scanner.hasNextLine()) {
                 Arrays.fill(heap, null); // Clear the heap for each run
@@ -37,10 +45,13 @@ public class Heap {
 
                 // Read elements into the heap
                 while (scanner.hasNextLine() && i < runLength + 1) {
+                    // Read the next line and trim leading/trailing whitespace
                     String line = scanner.nextLine().trim();
+                    // Skip empty lines
                     while (line.isEmpty() && scanner.hasNextLine()) {
                         line = scanner.nextLine().trim();
                     }
+                    // If the line is not empty, add to the head
                     if (!line.isEmpty()) {
                         heap[i] = line;
                         i++;
@@ -61,10 +72,16 @@ public class Heap {
         }
     }
 
+    /**
+     * Build a min-heap from the input array
+     * 
+     * @param size the number of elements in the heap - normally runLength but
+     *             sometimes less at the end of the input
+     */
     private static void buildMinHeap(int size) {
         if (size < 2)
             return; // No need to heapify if there's only one element
-
+        // Start from the last non-leaf node and heapify each node in reverse order
         for (int i = size / 2; i >= 1; i--) {
             heapify(i, size);
         }
@@ -85,28 +102,43 @@ public class Heap {
             smallest = right;
         }
 
+        // If the smallest element is not the root, swap the root with the smallest
+        // element
         if (smallest != i) {
             swap(i, smallest);
             heapify(smallest, n); // Recursively heapify the affected subtree
         }
     }
 
+    /**
+     * Swap two elements in the heap
+     * 
+     * @param i first item index
+     * @param j second item index
+     */
     private static void swap(int i, int j) {
         String temp = heap[i];
         heap[i] = heap[j];
         heap[j] = temp;
     }
 
+    /**
+     * Pop elements from the heap and write to the appropriate file/standard output
+     * 
+     * @param size     the number of elements in the heap
+     * @param runCount the current run count used for determining the output file
+     */
     private static void popAndPrint(int size, int runCount) {
+        // No need to pop if there are no elements
         if (size < 1)
             return;
 
+        // Write the smallest element to the appropriate file
         try (FileWriter writer = new FileWriter(runCount % 2 == 0 ? tempFile_1 : tempFile_2, true)) {
 
             while (size > 0 && heap[1] != null) {
 
                 // Write the smallest element to the appropriate file
-
                 writer.write(heap[1] + "\n");
                 // System.out.println(heap[1]); // Print the smallest element
 
